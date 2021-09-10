@@ -1,0 +1,30 @@
+---
+- name: Create Codeserver Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    # mode: 0755
+  with_items:
+    - "{{ docker_home }}/codeserver"
+    - "{{ docker_home }}/codeserver/local"
+
+- name: Code-server Docker Container
+  docker_container:
+    name: codeserver
+    image: ghcr.io/linuxserver/code-server
+    pull: true
+    volumes:
+      - "{{ codeserver_config_directory }}:/config:rw"
+    env:
+      TZ: "{{ timezone }}"
+    restart_policy: unless-stopped
+    memory: "{{ codeserver_memory }}"
+    labels:
+      traefik.enable: "{{ codeserver_available_externally }}"
+      traefik.http.routers.codeserver.rule: "Host(`{{ codeserver_hostname }}.{{ domain }}`)"
+      traefik.http.routers.codeserver.tls.certresolver: "letsencrypt"
+      # Below used if cert is wildcard
+      # traefik.http.routers.codeserver.tls.domains[0].main: "{{ domain }}"
+      # traefik.http.routers.codeserver.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.http.services.codeserver.loadbalancer.server.port: "8443"
+      traefik.http.routers.codeserver.middlewares: "authelia@docker"

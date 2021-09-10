@@ -1,0 +1,18 @@
+---
+codeserver_enabled: false
+codeserver_available_externally: "false"
+
+# directories
+codeserver_docker_image: ghcr.io/linuxserver/code-server:latest
+codeserver_config_directory: "{{ docker_home }}/codeserver"
+
+# network
+codeserver_port_http: "8443"
+codeserver_hostname: code
+
+# uid / gid
+codeserver_user_id: "1000"
+codeserver_group_id: "1000"
+
+# specs
+codeserver_memory: 1g

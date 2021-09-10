@@ -1,0 +1,25 @@
+---
+## PDNS info for LetsEncrypt
+pdns_api_url:
+pdns_api_key:
+pdns_server_id: "localhost"
+
+user: example-admin
+email: someone@example.com
+domain: dev.example.com
+
+docker_home: /srv/docker
+docker_image_directory: "{{ docker_home }}/images"
+docker_storage_driver: overlay2
+
+### Traefik
+traefik_enabled: true
+traefik_available_externally: "true"
+traefik_docker_image: traefik:v2.5
+
+### Allowed IPs for SSH
+firewall_allowed_ips: []
+#  - "xxx.xxx.xxx.xxx"
+#  - "xxx.xxx.xxx.xxx"
+
+ansible_python_interpreter: /usr/bin/python3

@@ -1,0 +1,6 @@
+---
+all:
+  hosts:
+    devbox01:
+      ansible_host:
+      ansible_user:

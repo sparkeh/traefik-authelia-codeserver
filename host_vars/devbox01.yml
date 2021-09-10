@@ -1,0 +1,16 @@
+---
+hostname: devbox01
+timezone: Etc/UTC
+
+### Docker
+docker_home: /srv/docker
+docker_image_directory: "{{ docker_home }}/images"
+docker_storage_driver: overlay2
+
+### Authelia auth thing
+authelia_enabled: true
+authelia_available_externally: "true"
+
+# Code Server (visual studio code)
+codeserver_enabled: true
+codeserver_available_externally: "true"

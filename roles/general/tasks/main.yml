@@ -1,0 +1,30 @@
+---
+- name: Update apt-cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  register: result
+  until: result is succeeded
+
+- name: Upgrade all packages
+  apt:
+    upgrade: "yes"
+    state: latest
+  when: keep_packages_updated
+  tags:
+    - skip_ansible_lint
+
+- name: Install some packages
+  apt:
+    name: "{{ extra_packages }}"
+    state: present
+  register: result
+  until: result is succeeded
+
+- name: "Set hostname to {{ inventory_hostname }}"
+  hostname:
+    name: "{{ inventory_hostname }}"
+
+- name: "Set timezone to {{ timezone  }}"
+  timezone:
+    name: "{{ timezone }}"

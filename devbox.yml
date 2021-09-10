@@ -1,0 +1,46 @@
+---
+- hosts: all
+
+  pre_tasks:
+    - import_tasks: tasks/users.yml
+      tags: users
+
+  roles:
+    - role: general
+      tags:
+        - general
+        - system
+
+    - role: geerlingguy.docker
+      tags:
+        - docker
+        - skip_ansible_lint
+
+    #### Main system tasks
+
+    - role: system-docker
+      tags:
+        - docker
+        - system
+
+    - role: firewall
+      tags:
+        - firewall
+        - system
+
+    #### Applications
+
+    - role: traefik
+      tags:
+        - traefik
+
+    - role: authelia
+      tags:
+        - authelia
+        - system
+
+    - role: code-server
+      tags:
+        - code-server
+        - system
+        - dev

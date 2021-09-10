@@ -1,0 +1,25 @@
+---
+traefik_enabled: false
+traefik_hostname: traefik
+
+# directories
+traefik_data_directory: "{{ docker_home }}/traefik"
+
+# network
+traefik_port_http: "80"
+traefik_port_https: "443"
+
+traefik_docker_image: "{{ traefik_docker_image }}"
+traefik_log_level: "INFO"
+
+# env variables for DNS at https://go-acme.github.io/lego/dns/
+traefik_dns_provider: pdns
+traefik_environment_variables: 
+#  PDNS_API_KEY: "{{ pdns_api_key }}"
+#  PDNS_API_URL: "{{ pdns_api_url }}"
+
+traefik_acme_server: "https://acme-staging-v02.api.letsencrypt.org/directory" # staging
+#traefik_acme_server: "https://acme-v02.api.letsencrypt.org/directory" # production
+
+# specs
+traefik_memory: 500m

@@ -1,0 +1,16 @@
+---
+# Update all apt packages when playbook is run
+keep_packages_updated: false
+
+# Extra packages to install
+extra_packages:
+  - smartmontools
+  - htop
+  - zfsutils-linux
+  - bonnie++
+  - unzip
+  - lm-sensors
+  - ctop
+  - curl
+
+timezone: Etc/UTC

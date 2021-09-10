@@ -1,0 +1,59 @@
+---
+- name: Create Traefik Directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ traefik_data_directory }}"
+    - "{{ traefik_data_directory }}/letsencrypt"
+
+- name: Template Traefik config.toml
+  template:
+    src: traefik.toml
+    dest: "{{ traefik_data_directory }}/traefik.toml"
+  register: template_config
+
+- name: Traefik Docker Container
+  docker_container:
+    name: traefik
+    image: "{{ traefik_docker_image }}"
+    pull: true
+    volumes:
+      - "{{ traefik_data_directory }}/traefik.toml:/etc/traefik/traefik.toml:ro"
+      - "{{ traefik_data_directory }}/letsencrypt:/letsencrypt:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    env: "{{ traefik_environment_variables }}"
+    restart_policy: unless-stopped
+    memory: "{{ traefik_memory }}"
+    recreate: "{{ template_config is changed }}"
+    network_mode: default
+    ports:
+      - "80:80"
+      - "443:443"
+    networks:
+      - name: "auth_net"
+    labels:
+      traefik.enable: "{{ traefik_available_externally }}"
+      traefik.http.routers.api.rule: "Host(`{{ traefik_hostname }}.{{ domain }}`)"
+      traefik.http.routers.api.entrypoints: "websecure"
+      traefik.http.routers.api.tls.certresolver: "letsencrypt"
+      # Below used if cert is wildcard
+      # traefik.http.routers.api.tls.domains[0].main: "{{ domain }}"
+      # traefik.http.routers.api.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.http.routers.api.service: "api@internal"
+      traefik.http.routers.api.middlewares: "authelia@docker"
+
+- name: Whoami docker container
+  docker_container:
+    name: whoami
+    image: "traefik/whoami"
+    pull: true
+    restart_policy: unless-stopped
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.whoami.rule: "Host(`whoami.{{ domain }}`)"
+      traefik.http.routers.whoami.tls.certresolver: "letsencrypt"
+      # Below used if cert is wildcard
+      # traefik.http.routers.whoami.tls.domains[0].main: "{{ domain }}"
+      # traefik.http.routers.whoami.tls.domains[0].sans: "*.{{ domain }}"
+      traefik.http.services.whoami.loadbalancer.server.port: "80"

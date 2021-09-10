@@ -1,0 +1,65 @@
+---
+- name: Create Authelia Directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - "{{ authelia_data_directory }}"
+
+- name: Copy Authelia configuration
+  template:
+    src: configuration.yml
+    dest: "{{ authelia_data_directory }}/configuration.yml"
+  register: template_config
+
+- name: Copy Authelia user database
+  copy:
+    src: files/users_database.yml
+    dest: "{{ authelia_data_directory }}/users_database.yml"
+
+
+- name: Authelia Docker Container
+  docker_container:
+    name: authelia
+    image: authelia/authelia
+    pull: true
+    volumes:
+      - "{{ authelia_data_directory }}:/config:rw"
+      - "{{ authelia_data_directory }}/configuration.yml:/etc/authelia/configuration.yml:ro"
+    restart_policy: unless-stopped
+    memory: 500m
+    network_mode: default
+    networks:
+      - name: "auth_net"
+    purge_networks: yes
+    expose:
+      - 9091
+    env:
+      TZ: "{{ timezone }}"
+    labels:
+      traefik.enable: "{{ authelia_available_externally }}"
+      traefik.http.routers.authelia.rule: "Host(`auth.{{ domain }}`)"
+      traefik.http.routers.authelia.entrypoints: "websecure"
+      traefik.http.routers.authelia.tls: "true"
+      traefik.http.routers.authelia.tls.certresolver: "letsencrypt"
+      traefik.http.middlewares.authelia.forwardauth.address: "http://authelia:9091/api/verify?rd=https://auth.{{ domain }}"
+      traefik.http.middlewares.authelia.forwardauth.trustForwardHeader: "true"
+      traefik.http.middlewares.authelia.forwardauth.authResponseHeaders: "Remote-User, Remote-Groups"
+    recreate: "{{ template_config is changed }}"
+
+- name: Authelia Redis Container
+  docker_container:
+    name: authelia-redis
+    image: redis:alpine
+    pull: true
+    volumes:
+      - "{{ authelia_data_directory }}/redis:/data:rw"
+    purge_networks: yes
+    network_mode: default
+    expose:
+      - 6379
+    networks:
+      - name: "auth_net"
+    restart_policy: unless-stopped
+    env:
+      TZ: "{{ timezone }}"

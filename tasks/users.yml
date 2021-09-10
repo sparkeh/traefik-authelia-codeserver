@@ -1,0 +1,15 @@
+---
+- name: Create devbox group
+  group:
+    name: devgroup
+    state: present
+
+- name: Create dev user
+  user:
+    name: devuser
+    state: present
+    system: yes
+    update_password: on_create
+    create_home: no
+    group: devgroup
+    shell: /usr/sbin/nologin

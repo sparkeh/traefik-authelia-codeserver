@@ -1,0 +1,5 @@
+---
+authelia_enabled: false
+authelia_available_externally: "false"
+
+authelia_data_directory: "{{ docker_home }}/authelia"

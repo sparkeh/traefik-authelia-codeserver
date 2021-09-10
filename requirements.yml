@@ -1,0 +1,5 @@
+---
+- name: geerlingguy.docker
+  version: 4.0.0
+- name: geerlingguy.firewall
+  version: 2.0.1

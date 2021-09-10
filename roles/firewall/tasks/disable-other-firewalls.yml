@@ -1,0 +1,12 @@
+---
+- name: Check if ufw package is installed (on Ubuntu).
+  command: service ufw status
+  args:
+    warn: false
+  register: ufw_installed
+  ignore_errors: true
+  changed_when: false
+  when:
+    - ansible_distribution == "Ubuntu"
+    - firewall_disable_ufw
+  check_mode: false
